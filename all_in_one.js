@@ -31,14 +31,14 @@ function getPath(folderPath, file = "config.js") {
   return "FOLDER PATH IS NOT DEFINED!"
 }
 const config_file_path = process.argv[2] ? getPath(process.argv[2]) : "";
-const is_exist_file = await fileExists(config_file_path);
+const is_file_exists = await fileExists(config_file_path);
 
 /*
   Checking allowed properties
 */
 const allowed_properties = ["imports", "frontmatter", "outputFile", "outputDir", "order"]; 
 async function check_properties() {
-  if (is_exist_file) {
+  if (is_file_exists) {
     try {
       let is_allowed = true, unknown_props = [];
       const config_object = await import(config_file_path);
