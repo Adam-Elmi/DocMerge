@@ -99,7 +99,7 @@ async function check_properties() {
             unknown_props.push(key);
           } 
         }
-        return {is_allowed, unknown_props, type_value: check_type_value(config_object.default)};
+        return {is_allowed, unknown_props, invalid_types: check_type_value(config_object.default)};
       }
     } catch (err) {
       console.error(err);
@@ -107,4 +107,7 @@ async function check_properties() {
   }
   return "FILE DOES NOT EXIST!";
 }
-console.log(await check_properties());
+
+const properties_details = await check_properties();
+
+console.log(properties_details);
