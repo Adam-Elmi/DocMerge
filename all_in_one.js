@@ -17,18 +17,17 @@ const fileExists = async (path) => {
 };
 
 function getPath(folderPath, file = "config.js") {
-  if(folderPath) {
+  if (folderPath) {
     let path;
-    if(os.platform() === "win32") {
+    if (os.platform() === "win32") {
       path = folderPath + "\\" + file;
       return path.replace(/\\\\+/g, "\\");
-    }
-    else {
-      path = folderPath + "/" + file
+    } else {
+      path = folderPath + "/" + file;
       return path.replace(/\/\/+/g, "/");
     }
   }
-  return "FOLDER PATH IS NOT DEFINED!"
+  return "FOLDER PATH IS NOT DEFINED!";
 }
 const config_file_path = process.argv[2] ? getPath(process.argv[2]) : "";
 const is_file_exists = await fileExists(config_file_path);
@@ -37,10 +36,17 @@ const is_file_exists = await fileExists(config_file_path);
   Checking allowed properties
 */
 
-const allowed_properties = ["imports", "frontmatter", "outputFile", "outputDir", "order"];
+const config_object = await import(config_file_path);
+const allowed_properties = [
+  "imports",
+  "frontmatter",
+  "outputFile",
+  "outputDir",
+  "order",
+];
 function is_includes(obj) {
-  for(const prop of allowed_properties) {
-    switch(true) {
+  for (const prop of allowed_properties) {
+    switch (true) {
       case obj.hasOwnProperty(prop):
         return true;
     }
@@ -50,56 +56,63 @@ function is_includes(obj) {
 const invalid_type_value = [];
 
 function check_type_value(obj) {
-  if(obj.hasOwnProperty("imports") && !Array.isArray(obj.imports)) {
+  if (obj.hasOwnProperty("imports") && !Array.isArray(obj.imports)) {
     invalid_type_value.push({
       prop_name: "imports",
       has_type: typeof obj.imports,
-      expected_type: "Array of strings"
-    })
+      expected_type: "Array of strings",
+    });
   }
-  if(obj.hasOwnProperty("frontmatter") && typeof obj.frontmatter !== "string") {
+  if (
+    obj.hasOwnProperty("frontmatter") &&
+    typeof obj.frontmatter !== "string"
+  ) {
     invalid_type_value.push({
       prop_name: "frontmatter",
       has_type: typeof obj.frontmatter,
-      expected_type: "String"
-    })
+      expected_type: "String",
+    });
   }
-  if(obj.hasOwnProperty("outputFile") && typeof obj.outputFile !== "string") {
+  if (obj.hasOwnProperty("outputFile") && typeof obj.outputFile !== "string") {
     invalid_type_value.push({
       prop_name: "outputFile",
       has_type: typeof obj.outputFile,
-      expected_type: "String"
-    })
+      expected_type: "String",
+    });
   }
-  if(obj.hasOwnProperty("outputDir") && typeof obj.outputDir !== "string") {
+  if (obj.hasOwnProperty("outputDir") && typeof obj.outputDir !== "string") {
     invalid_type_value.push({
       prop_name: "outputDir",
       has_type: typeof obj.outputDir,
-      expected_type: "String"
-    })
+      expected_type: "String",
+    });
   }
-  if(obj.hasOwnProperty("order") && !Array.isArray(obj.order)) {
+  if (obj.hasOwnProperty("order") && !Array.isArray(obj.order)) {
     invalid_type_value.push({
       prop_name: "order",
       has_type: typeof obj.order,
-      expected_type: "Array of strings"
-    })
+      expected_type: "Array of strings",
+    });
   }
   return invalid_type_value;
 }
 async function check_properties() {
   if (is_file_exists) {
     try {
-      const config_object = await import(config_file_path);
-      let is_allowed = is_includes(config_object.default), unknown_props = [];
-      if(config_object.default) {
-        for(const key of Object.keys(config_object.default)) {
-          if(!allowed_properties.includes(key)) {
+      let is_allowed = is_includes(config_object.default),
+        unknown_props = [];
+      if (config_object.default) {
+        for (const key of Object.keys(config_object.default)) {
+          if (!allowed_properties.includes(key)) {
             is_allowed = false;
             unknown_props.push(key);
-          } 
+          }
         }
-        return {is_allowed, unknown_props, invalid_types: check_type_value(config_object.default)};
+        return {
+          is_allowed,
+          unknown_props,
+          invalid_types: check_type_value(config_object.default),
+        };
       }
     } catch (err) {
       console.error(err);
@@ -111,3 +124,34 @@ async function check_properties() {
 const properties_details = await check_properties();
 
 console.log(properties_details);
+
+async function read_file(path) {
+  const is_exists = await fileExists(path);
+  try {
+    if (is_exists) {
+      const content = await fs.readFile(path);
+      return content.toString();
+    }
+  } catch (err) {
+    console.error(err);
+  }
+  return "FILE DOES NOT EXIST!";
+}
+
+// console.log(await read_file("./example/config.js"));
+
+async function generate_file() {
+  const is_outputFile_empty = typeof config_object.default.outputFile === "string" && config_object.default.outputFile !== "";
+  const is_outputDir_exists = await fileExists(config_object.default.outputDir);
+  if (
+    properties_details.is_allowed === true &&
+    properties_details.unknown_props.length === 0 &&
+    properties_details.invalid_types.length === 0
+  ) {
+    if(is_outputFile_empty && is_outputDir_exists) {
+      return "All pre-steps are completed!"
+    }
+  }
+}
+
+console.log(await generate_file());
