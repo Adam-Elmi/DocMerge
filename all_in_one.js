@@ -140,13 +140,24 @@ async function read_file(path) {
 
 // console.log(await read_file("./example/config.js"));
 
+async function add_contents(path, files) {
+  if (path && Array.isArray(files) && files.length > 0) {
+    for (const file of files) {
+      const content = await fs.readFile(getPath(process.argv[2], file));
+      await fs.appendFile(path, "\n" + content);
+    }
+  }
+  return "PATH IS NOT DEFINED OR ARGUMENT 'FILES' IS EMPTY";
+}
 async function read_directory(path) {
   try {
     if (path) {
       const is_dir_exists = await fileExists(path);
-      if(is_dir_exists) {
+      if (is_dir_exists) {
         const files = await fs.readdir(path);
-        return files.filter((filename) => filename.toLowerCase() !== "config.js");
+        return files.filter(
+          (filename) => filename.toLowerCase() !== "config.js",
+        );
       }
     }
   } catch (err) {
@@ -167,7 +178,19 @@ async function generate_file() {
   ) {
     if (is_outputFile_empty && is_outputDir_exists) {
       const files = await read_directory(process.argv[2]);
-      return files;
+      try {
+        const path = getPath(
+          config_object.default.outputDir,
+          config_object.default.outputFile,
+        );
+        console.log(path);
+        const is_outputFile_exists = await fileExists(path);
+        if (is_outputFile_exists) {
+          await add_contents(path, files);
+        }
+      } catch (err) {
+        console.error(err);
+      }
     }
   }
 }
