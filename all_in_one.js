@@ -1,7 +1,9 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 /*
- Checking if config.js exist in the target folder
+  ---------------
+  Check if config.js exist in the target folder
+  ---------------
 */
 const fileExists = async (path) => {
   try {
@@ -15,7 +17,11 @@ const fileExists = async (path) => {
     return false;
   }
 };
-
+/*
+  ---------------
+  Return accurate path
+  ---------------
+*/
 function getPath(folderPath, file = "config.js") {
   if (folderPath) {
     let path;
@@ -33,10 +39,17 @@ const config_file_path = process.argv[2] ? getPath(process.argv[2]) : "";
 const is_file_exists = await fileExists(config_file_path);
 
 /*
-  Checking allowed properties
+  ---------------
+  Check allowed properties
+  ---------------
 */
 
 const config_object = await import(config_file_path);
+/*
+  ---------------
+  Allowed properties
+  ---------------
+*/
 const allowed_properties = [
   "imports",
   "frontmatter",
@@ -44,6 +57,11 @@ const allowed_properties = [
   "outputDir",
   "order",
 ];
+/*
+  ---------------
+  Check if config file includes allowed properties
+  ---------------
+*/
 function is_includes(obj) {
   for (const prop of allowed_properties) {
     switch (true) {
@@ -53,50 +71,53 @@ function is_includes(obj) {
   }
   return false;
 }
+/*
+  ---------------
+  Valid type for allowed properties
+  ---------------
+*/
+const valid_types = {
+  imports: "Array of strings",
+  frontmatter: "String",
+  outputFile: "String",
+  outputDir: "String",
+  order: "Array of strings",
+};
 const invalid_type_value = [];
-
+/*
+  ---------------
+  Check valid types
+  ---------------
+*/
 function check_type_value(obj) {
-  if (obj.hasOwnProperty("imports") && !Array.isArray(obj.imports)) {
-    invalid_type_value.push({
-      prop_name: "imports",
-      has_type: typeof obj.imports,
-      expected_type: "Array of strings",
-    });
-  }
-  if (
-    obj.hasOwnProperty("frontmatter") &&
-    typeof obj.frontmatter !== "string"
-  ) {
-    invalid_type_value.push({
-      prop_name: "frontmatter",
-      has_type: typeof obj.frontmatter,
-      expected_type: "String",
-    });
-  }
-  if (obj.hasOwnProperty("outputFile") && typeof obj.outputFile !== "string") {
-    invalid_type_value.push({
-      prop_name: "outputFile",
-      has_type: typeof obj.outputFile,
-      expected_type: "String",
-    });
-  }
-  if (obj.hasOwnProperty("outputDir") && typeof obj.outputDir !== "string") {
-    invalid_type_value.push({
-      prop_name: "outputDir",
-      has_type: typeof obj.outputDir,
-      expected_type: "String",
-    });
-  }
-  if (obj.hasOwnProperty("order") && !Array.isArray(obj.order)) {
-    invalid_type_value.push({
-      prop_name: "order",
-      has_type: typeof obj.order,
-      expected_type: "Array of strings",
-    });
+  for (const prop of allowed_properties) {
+    if (prop === "imports" || prop === "order") {
+      if (obj.hasOwnProperty(prop) && !Array.isArray(obj[prop])) {
+        invalid_type_value.push({
+          prop_name: prop,
+          has_type: typeof obj[prop],
+          expected_type: valid_types[prop],
+        });
+      }
+    }
+    else if (prop !== "imports" || prop !== "order") {
+      if (obj.hasOwnProperty(prop) && typeof obj[prop] !== "string") {
+        invalid_type_value.push({
+          prop_name: prop,
+          has_type: typeof obj[prop],
+          expected_type: valid_types[prop],
+        });
+      }
+    }
   }
   return invalid_type_value;
 }
-async function check_properties() {
+/*
+  ---------------
+  Get properties info
+  ---------------
+*/
+async function get_properies_info() {
   if (is_file_exists) {
     try {
       let is_allowed = is_includes(config_object.default),
@@ -121,30 +142,17 @@ async function check_properties() {
   return "FILE DOES NOT EXIST!";
 }
 
-const properties_details = await check_properties();
-
-console.log(properties_details);
-
-async function read_file(path) {
-  const is_exists = await fileExists(path);
-  try {
-    if (is_exists) {
-      const content = await fs.readFile(path);
-      return content.toString();
-    }
-  } catch (err) {
-    console.error(err);
-  }
-  return "FILE DOES NOT EXIST!";
-}
-
-// console.log(await read_file("./example/config.js"));
-
+const properties_info = await get_properies_info();
+/*
+  ---------------
+  Add contents to output file
+  ---------------
+*/
 async function add_contents(path, files) {
   if (path && Array.isArray(files) && files.length > 0) {
     for (const file of files) {
       const content = await fs.readFile(getPath(process.argv[2], file));
-      await fs.appendFile(path, "\n" + content);
+      await fs.appendFile(path, content + "\n");
     }
   }
   return "PATH IS NOT DEFINED OR ARGUMENT 'FILES' IS EMPTY";
@@ -165,16 +173,20 @@ async function read_directory(path) {
   }
   return "DIRECTORY DOES NOT EXIST!";
 }
-
+/*
+  ---------------
+  Generate output file
+  ---------------
+*/
 async function generate_file() {
   const is_outputFile_empty =
     typeof config_object.default.outputFile === "string" &&
     config_object.default.outputFile !== "";
   const is_outputDir_exists = await fileExists(config_object.default.outputDir);
   if (
-    properties_details.is_allowed === true &&
-    properties_details.unknown_props.length === 0 &&
-    properties_details.invalid_types.length === 0
+    properties_info.is_allowed === true &&
+    properties_info.unknown_props.length === 0 &&
+    properties_info.invalid_types.length === 0
   ) {
     if (is_outputFile_empty && is_outputDir_exists) {
       const files = await read_directory(process.argv[2]);
@@ -183,9 +195,12 @@ async function generate_file() {
           config_object.default.outputDir,
           config_object.default.outputFile,
         );
-        console.log(path);
         const is_outputFile_exists = await fileExists(path);
         if (is_outputFile_exists) {
+          await fs.writeFile(path, "");
+          await add_contents(path, files);
+        } else {
+          await fs.writeFile(path, "");
           await add_contents(path, files);
         }
       } catch (err) {
