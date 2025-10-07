@@ -1,6 +1,6 @@
 export default {
   imports: [],
-  name: "Adam",
-  order: 5,
-  id: 101,
+  outputFile: "js.md",
+  outputDir: "./generated",
+  order: [],
 }
