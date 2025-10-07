@@ -140,16 +140,34 @@ async function read_file(path) {
 
 // console.log(await read_file("./example/config.js"));
 
+async function read_directory(path) {
+  try {
+    if (path) {
+      const is_dir_exists = await fileExists(path);
+      if(is_dir_exists) {
+        const files = await fs.readdir(path);
+        return files.filter((filename) => filename.toLowerCase() !== "config.js");
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+  return "DIRECTORY DOES NOT EXIST!";
+}
+
 async function generate_file() {
-  const is_outputFile_empty = typeof config_object.default.outputFile === "string" && config_object.default.outputFile !== "";
+  const is_outputFile_empty =
+    typeof config_object.default.outputFile === "string" &&
+    config_object.default.outputFile !== "";
   const is_outputDir_exists = await fileExists(config_object.default.outputDir);
   if (
     properties_details.is_allowed === true &&
     properties_details.unknown_props.length === 0 &&
     properties_details.invalid_types.length === 0
   ) {
-    if(is_outputFile_empty && is_outputDir_exists) {
-      return "All pre-steps are completed!"
+    if (is_outputFile_empty && is_outputDir_exists) {
+      const files = await read_directory(process.argv[2]);
+      return files;
     }
   }
 }
