@@ -3,15 +3,17 @@ import os from "node:os";
 /*
   ---------------
   Check if config.js exist in the target folder
+  < fileExists >
+  * -> return boolean value
   ---------------
 */
-const fileExists = async (path) => {
+export const fileExists = async (path) => {
   try {
     if (path) {
       await fs.access(path);
       return true;
     } else {
-      console.log("PROVIDE THE PATH!");
+      throw new Error("PROVIDE THE PATH!");
     }
   } catch (_) {
     return false;
@@ -20,6 +22,9 @@ const fileExists = async (path) => {
 /*
   ---------------
   Return accurate path
+  < getPath >
+  * -> return a string value
+  * -> throws an error if folder is not found
   ---------------
 */
 function getPath(folderPath, file = "config.js") {
@@ -32,11 +37,17 @@ function getPath(folderPath, file = "config.js") {
       path = folderPath + "/" + file;
       return path.replace(/\/\/+/g, "/");
     }
+  } else {
+    throw new Error("FOLDER PATH IS NOT DEFINED!");
   }
-  return "FOLDER PATH IS NOT DEFINED!";
 }
-const config_file_path = process.argv[2] ? getPath(process.argv[2]) : "";
-const is_file_exists = await fileExists(config_file_path);
+const config_file_path =
+  import.meta.url === `file://${process.argv[1]}` && process.argv[2]
+    ? getPath(process.argv[2])
+    : "";
+const is_file_exists =
+  import.meta.url === `file://${process.argv[1]}` &&
+  (await fileExists(config_file_path));
 
 /*
   ---------------
@@ -44,7 +55,9 @@ const is_file_exists = await fileExists(config_file_path);
   ---------------
 */
 
-const config_object = await import(config_file_path);
+const config_object =
+  import.meta.url === `file://${process.argv[1]}` &&
+  (await import(config_file_path));
 /*
   ---------------
   Allowed properties
@@ -60,6 +73,8 @@ const allowed_properties = [
 /*
   ---------------
   Check if config file includes allowed properties
+  < is_includes >
+  * -> returns a boolean value
   ---------------
 */
 function is_includes(obj) {
@@ -87,6 +102,8 @@ const invalid_type_value = [];
 /*
   ---------------
   Check valid types
+  < invalid_type_value >
+  * -> return array of objects
   ---------------
 */
 function check_type_value(obj) {
@@ -99,8 +116,7 @@ function check_type_value(obj) {
           expected_type: valid_types[prop],
         });
       }
-    }
-    else if (prop !== "imports" || prop !== "order") {
+    } else if (prop !== "imports" || prop !== "order") {
       if (obj.hasOwnProperty(prop) && typeof obj[prop] !== "string") {
         invalid_type_value.push({
           prop_name: prop,
@@ -115,6 +131,9 @@ function check_type_value(obj) {
 /*
   ---------------
   Get properties info
+  < get_properies_info >
+  * -> return an object
+  * -> throws an error if file is not found
   ---------------
 */
 async function get_properies_info() {
@@ -138,14 +157,19 @@ async function get_properies_info() {
     } catch (err) {
       console.error(err);
     }
+  } else {
+    throw new Error("FILE DOES NOT EXIST!");
   }
-  return "FILE DOES NOT EXIST!";
 }
 
-const properties_info = await get_properies_info();
+const properties_info =
+  import.meta.url === `file://${process.argv[1]}` &&
+  (await get_properies_info());
 /*
   ---------------
   Add contents to output file
+  < add_contents >
+  * -> throws an error if path is incorrect
   ---------------
 */
 async function add_contents(path, files) {
@@ -154,12 +178,16 @@ async function add_contents(path, files) {
       const content = await fs.readFile(getPath(process.argv[2], file));
       await fs.appendFile(path, content + "\n");
     }
+  } else {
+    throw new Error("PATH IS NOT DEFINED OR ARGUMENT 'FILES' IS EMPTY");
   }
-  return "PATH IS NOT DEFINED OR ARGUMENT 'FILES' IS EMPTY";
 }
 /*
   ---------------
   Get files inside a folder/directory
+  < read_directory >
+  * -> returns array of strings
+  * -> throws an error if folder is not found
   ---------------
 */
 async function read_directory(path) {
@@ -173,14 +201,15 @@ async function read_directory(path) {
         );
       }
     }
-  } catch (err) {
-    console.error(err);
+  } catch (_) {
+    throw new Error("DIRECTORY DOES NOT EXIST!");
   }
-  return "DIRECTORY DOES NOT EXIST!";
 }
 /*
   ---------------
   Generate output file
+  < generate_file >
+  * ->
   ---------------
 */
 async function generate_file() {
@@ -204,9 +233,11 @@ async function generate_file() {
         if (is_outputFile_exists) {
           await fs.writeFile(path, "");
           await add_contents(path, files);
+          console.log("FILE IS GENERATED SUCCESSFULLY!");
         } else {
           await fs.writeFile(path, "");
           await add_contents(path, files);
+          console.log("FILE IS GENERATED SUCCESSFULLY!");
         }
       } catch (err) {
         console.error(err);
@@ -215,4 +246,6 @@ async function generate_file() {
   }
 }
 
-console.log(await generate_file());
+if (import.meta.url === `file://${process.argv[1]}`) {
+  await generate_file();
+}
