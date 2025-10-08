@@ -27,7 +27,7 @@ export const fileExists = async (path) => {
   * -> throws an error if folder is not found
   ---------------
 */
-function getPath(folderPath, file = "config.js") {
+export function getPath(folderPath, file = "config.js") {
   if (folderPath) {
     let path;
     if (os.platform() === "win32") {
@@ -55,7 +55,7 @@ const is_file_exists =
   ---------------
 */
 
-const config_object =
+export const config_object =
   import.meta.url === `file://${process.argv[1]}` &&
   (await import(config_file_path));
 /*
@@ -77,15 +77,15 @@ const allowed_properties = [
   * -> returns a boolean value
   ---------------
 */
-function is_includes(obj) {
-  for (const prop of allowed_properties) {
-    switch (true) {
-      case obj.hasOwnProperty(prop):
-        return true;
+export function is_includes(obj) {
+  for(const key of Object.keys(obj)) {
+    if(!allowed_properties.includes(key)) {
+      return false;
     }
   }
-  return false;
+  return true;
 }
+console.log(is_includes(config_object.default));
 /*
   ---------------
   Valid type for allowed properties
