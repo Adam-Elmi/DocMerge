@@ -55,7 +55,7 @@ const is_file_exists =
   ---------------
 */
 
-export const config_object =
+const config_object =
   import.meta.url === `file://${process.argv[1]}` &&
   (await import(config_file_path));
 /*
@@ -85,7 +85,7 @@ export function is_includes(obj) {
   }
   return true;
 }
-console.log(is_includes(config_object.default));
+// console.log(is_includes(config_object.default));
 /*
   ---------------
   Valid type for allowed properties
@@ -106,7 +106,7 @@ const invalid_type_value = [];
   * -> return array of objects
   ---------------
 */
-function check_type_value(obj) {
+export function check_type_value(obj) {
   for (const prop of allowed_properties) {
     if (prop === "imports" || prop === "order") {
       if (obj.hasOwnProperty(prop) && !Array.isArray(obj[prop])) {
