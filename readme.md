@@ -14,7 +14,7 @@ js-topics/
  ├── 3-conditionals.mdx
 ```
 
-2. Set output file in `config.js`.
+2. Set output folder and output file in `config.js`.
 
 3. Run:
 
