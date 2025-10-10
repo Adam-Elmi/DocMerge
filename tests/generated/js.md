@@ -1,0 +1,17 @@
+---
+  name: Adam Elmi Eid
+  id: 101
+---
+  
+
+import somcheat_api from 'somcheat'
+
+# Step One
+```js
+console.log("Hello Adam Elmi");
+```
+# Step Two
+# Step Three
+# Step Four
+# Step Five
+# Step Six
