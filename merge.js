@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs/promises";
 import os from "node:os";
+import { pathToFileURL } from "node:url";
 /*
   ---------------
   Check if config.js exist in the target folder
@@ -51,7 +52,8 @@ const is_file_exists = await fileExists(config_file_path);
   ---------------
 */
 
-const config_object = await import(config_file_path);
+const config_object = await import(pathToFileURL(config_file_path).href);
+
 /*
   ---------------
   Allowed properties
@@ -92,7 +94,6 @@ const valid_types = {
   outputDir: "String",
   order: "Array of strings",
 };
-const invalid_type_value = [];
 /*
   ---------------
   Check valid types
@@ -101,6 +102,7 @@ const invalid_type_value = [];
   ---------------
 */
 export function check_type_value(obj) {
+  const invalid_type_value = [];
   for (const prop of allowed_properties) {
     if (prop === "imports" || prop === "order") {
       if (obj.hasOwnProperty(prop) && !Array.isArray(obj[prop])) {
@@ -110,7 +112,7 @@ export function check_type_value(obj) {
           expected_type: valid_types[prop],
         });
       }
-    } else if (prop !== "imports" || prop !== "order") {
+    } else if (prop !== "imports" && prop !== "order") {
       if (obj.hasOwnProperty(prop) && typeof obj[prop] !== "string") {
         invalid_type_value.push({
           prop_name: prop,
@@ -173,9 +175,9 @@ async function add_contents(path, files) {
       Array.isArray(config_object.default.imports) &&
       config_object.default.imports.length > 0
     ) {
-      config_object.default.imports.forEach(async (value) => {
-        await fs.appendFile(path, "\n" + value + "\n\n");
-      });
+      for (const value of config_object.default.imports) {
+        await fs.appendFile(path, value + "\n\n");
+      }
     }
     for (const file of files) {
       const content = await fs.readFile(getPath(process.argv[2], file));
@@ -216,6 +218,7 @@ async function read_directory(path) {
   ---------------
 */
 async function generate_file() {
+  console.log(properties_info);
   const is_outputFile_empty =
     typeof config_object.default.outputFile === "string" &&
     config_object.default.outputFile !== "";
@@ -225,6 +228,12 @@ async function generate_file() {
     properties_info.unknown_props.length === 0 &&
     properties_info.invalid_types.length === 0
   ) {
+    if (!is_outputDir_exists) {
+      console.error(
+        "Output directory does not exist:",
+        config_object.default.outputDir,
+      );
+    }
     if (is_outputFile_empty && is_outputDir_exists) {
       const files = await read_directory(process.argv[2]);
       try {
@@ -239,7 +248,34 @@ async function generate_file() {
         console.error(err);
       }
     }
+  } else {
+    console.error("Invalid or unsupported configuration in config.js");
+
+    if (!properties_info.is_allowed) {
+      console.error(
+        "Your config includes unknown properties:",
+        properties_info.unknown_props.join(", ") || "none",
+      );
+    }
+
+    if (properties_info.invalid_types.length > 0) {
+      console.error("Invalid property types:");
+      for (const {
+        prop_name,
+        has_type,
+        expected_type,
+      } of properties_info.invalid_types) {
+        console.error(
+          `   → ${prop_name}: got ${has_type}, expected ${expected_type}`,
+        );
+      }
+    }
   }
 }
 
-await generate_file();
+try {
+  await generate_file();
+  console.log("Merge complete!");
+} catch (err) {
+  console.error(`Merge failed: ${err}`);
+}
