@@ -163,8 +163,8 @@ async function add_contents(path, files) {
       Array.isArray(config_object.default.imports) &&
       config_object.default.imports.length > 0
     ) {
-      for (const value of config_object.default.imports) {
-        await fs.appendFile(path, value + "\n");
+      for (let i = 0; i < config_object.default.imports.length; i++) {
+        await fs.appendFile(path, config_object.default.imports[i] + "\n" + (i === (config_object.default.imports.length - 1) ? "\n" : ""));
       }
     }
     if(config_object.default.hook) {
