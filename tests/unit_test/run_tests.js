@@ -4,7 +4,7 @@ import {
   getPath,
   is_includes,
   check_type_value,
-} from "../../merge.js";
+} from "../merge.test.js";
 
 function expect_to_be_equal(
   value1,
@@ -37,7 +37,7 @@ console.log("\x1b[34m[--Testing function:\x1b[0m \x1b[36mfileExists--]\x1b[0m");
   * Expected result: true
   ---------------
 */
-const is_file_1_exists = await fileExists("./tests/doc_test/config.js");
+const is_file_1_exists = await fileExists("./tests/example/config.js");
 expect_to_be_equal(is_file_1_exists, true, "Check if file exists using a real path");
 /*
   ---------------
@@ -82,7 +82,7 @@ console.log(
   * Expected result: true
   ---------------
 */
-const config_object = await import("../doc_test/config.js");
+const config_object = await import("../example/config.js");
 expect_to_be_equal(is_includes(config_object.default), true, "Check if config_object includes allowed properties");
 /*
   ---------------
