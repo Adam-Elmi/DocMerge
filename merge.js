@@ -65,6 +65,7 @@ const allowed_properties = [
   "outputFile",
   "outputDir",
   "order",
+  "hook",
 ];
 /*
   ---------------
@@ -92,6 +93,7 @@ const valid_types = {
   outputFile: "String",
   outputDir: "String",
   order: "Array of strings",
+  hook: "Function",
 };
 /*
   ---------------
@@ -111,8 +113,16 @@ export function check_type_value(obj) {
           expected_type: valid_types[prop],
         });
       }
-    } else if (prop !== "imports" && prop !== "order") {
+    } else if (prop !== "imports" && prop !== "order" && prop !== "hook") {
       if (obj.hasOwnProperty(prop) && typeof obj[prop] !== "string") {
+        invalid_type_value.push({
+          prop_name: prop,
+          has_type: typeof obj[prop],
+          expected_type: valid_types[prop],
+        });
+      }
+    } else if (prop === "hook") {
+      if (obj.hasOwnProperty(prop) && typeof obj[prop] !== "function") {
         invalid_type_value.push({
           prop_name: prop,
           has_type: typeof obj[prop],
@@ -178,9 +188,13 @@ async function add_contents(path, files) {
         await fs.appendFile(path, value + "\n\n");
       }
     }
-    for (const file of files) {
-      const content = await fs.readFile(getPath(process.argv[2], file));
-      await fs.appendFile(path, content + "\n");
+    if(config_object.default.hook) {
+      return config_object.default.hook(path, files);
+    } else {
+      for (const file of files) {
+        const content = await fs.readFile(getPath(process.argv[2], file));
+        await fs.appendFile(path, content + "\n");
+      }
     }
   } else {
     throw new Error("PATH IS NOT DEFINED OR ARGUMENT 'FILES' IS EMPTY");
