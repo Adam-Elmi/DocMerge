@@ -5,7 +5,7 @@ export default {
   id: 101
 ---
   `,
-  outputFile: "js.md",
+  outputFile: "js.mdx",
   outputDir: "./tests/generated",
   order: [],
 }
