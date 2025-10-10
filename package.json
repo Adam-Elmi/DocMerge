@@ -1,0 +1,33 @@
+{
+  "name": "docmerge",
+  "version": "1.0.0",
+  "description": "**DocMerge** combines multiple topic files into one single document for easy documentation management.",
+  "main": "merge.js",
+  "directories": {
+    "test": "tests"
+  },
+  "type": "module",
+  "bin": {
+    "docmerge": "./merge.js"
+  },
+  "scripts": {
+    "start": "node merge.js",
+    "test": "node tests/unit_test/run_tests.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Adam-Elmi/DocMerge.git"
+  },
+  "keywords": [
+    "DocMerge",
+    "Docs",
+    "Documentation",
+    "Merge"
+  ],
+  "author": "Adam ELmi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Adam-Elmi/DocMerge/issues"
+  },
+  "homepage": "https://github.com/Adam-Elmi/DocMerge#readme"
+}
