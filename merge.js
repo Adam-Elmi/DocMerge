@@ -81,7 +81,6 @@ export function is_includes(obj) {
   }
   return true;
 }
-// console.log(is_includes(config_object.default));
 /*
   ---------------
   Valid type for allowed properties
@@ -97,7 +96,7 @@ const valid_types = {
 /*
   ---------------
   Check valid types
-  < invalid_type_value >
+  < check_type_value >
   * -> return array of objects
   ---------------
 */
@@ -218,7 +217,6 @@ async function read_directory(path) {
   ---------------
 */
 async function generate_file() {
-  console.log(properties_info);
   const is_outputFile_empty =
     typeof config_object.default.outputFile === "string" &&
     config_object.default.outputFile !== "";
