@@ -29,6 +29,6 @@ Generates a single combined file in the target folder.
 > [!NOTE]
 > Orders files by filename (prefix with numbers)
 
-[!TIP]
-Only specific configuration properties are allowed in config.js (such as imports, frontmatter, outputFile, outputDir, and order)
+> [!TIP]
+> Only specific configuration properties are allowed in config.js (such as imports, frontmatter, outputFile, outputDir, and order)
 — this limitation is intentional to avoid confusion and keep DocMerge predictable and easy to use.
