@@ -4,7 +4,7 @@ import os from "node:os";
 import { pathToFileURL } from "node:url";
 /*
   ---------------
-  Check if config.js exist in the target folder
+  Checks if config.js exist in the target folder
   < fileExists >
   * -> return boolean value
   ---------------
@@ -23,7 +23,7 @@ export const fileExists = async (path) => {
 };
 /*
   ---------------
-  Return accurate path
+  Returns accurate path
   < getPath >
   * -> return a string value
   * -> throws an error if folder is not found
@@ -48,7 +48,7 @@ const is_file_exists = await fileExists(config_file_path);
 
 /*
   ---------------
-  Check allowed properties
+  Checks allowed properties
   ---------------
 */
 
@@ -68,7 +68,7 @@ const allowed_properties = [
 ];
 /*
   ---------------
-  Check if config file includes allowed properties
+  Checks if config file includes allowed properties
   < is_includes >
   * -> returns a boolean value
   ---------------
@@ -95,7 +95,7 @@ const valid_types = {
 };
 /*
   ---------------
-  Check valid types
+  Checks valid types
   < check_type_value >
   * -> return array of objects
   ---------------
@@ -125,7 +125,7 @@ export function check_type_value(obj) {
 }
 /*
   ---------------
-  Get properties info
+  Gets properties info
   < get_properies_info >
   * -> return an object
   * -> throws an error if file is not found
@@ -160,7 +160,7 @@ async function get_properies_info() {
 const properties_info = await get_properies_info();
 /*
   ---------------
-  Add contents to output file
+  Adds contents to output file
   < add_contents >
   * -> throws an error if path is incorrect
   ---------------
@@ -188,7 +188,7 @@ async function add_contents(path, files) {
 }
 /*
   ---------------
-  Get files inside a folder/directory
+  Gets files inside a folder/directory
   < read_directory >
   * -> returns array of strings
   * -> throws an error if folder is not found
@@ -211,7 +211,7 @@ async function read_directory(path) {
 }
 /*
   ---------------
-  Generate output file
+  Generates output file
   < generate_file >
   * ->
   ---------------
@@ -273,7 +273,7 @@ async function generate_file() {
 
 try {
   await generate_file();
-  console.log("Merge complete!");
+  console.log("Merge completed!");
 } catch (err) {
   console.error(`Merge failed: ${err}`);
 }
