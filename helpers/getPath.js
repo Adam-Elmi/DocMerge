@@ -1,4 +1,12 @@
 import os from "node:os";
+/*
+  ---------------
+  Returns accurate path
+  < getPath >
+  * -> return a string value
+  * -> throws an error if folder is not found
+  ---------------
+*/
 export function getPath(folderPath, file = "config.js") {
   if (folderPath) {
     let path;
