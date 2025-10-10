@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs/promises";
-import os from "node:os";
 import { pathToFileURL } from "node:url";
+import { getPath } from "./helpers/getPath.js";
 /*
   ---------------
   Checks if config.js exist in the target folder
@@ -21,28 +21,7 @@ export const fileExists = async (path) => {
     return false;
   }
 };
-/*
-  ---------------
-  Returns accurate path
-  < getPath >
-  * -> return a string value
-  * -> throws an error if folder is not found
-  ---------------
-*/
-export function getPath(folderPath, file = "config.js") {
-  if (folderPath) {
-    let path;
-    if (os.platform() === "win32") {
-      path = folderPath + "\\" + file;
-      return path.replace(/\\\\+/g, "\\");
-    } else {
-      path = folderPath + "/" + file;
-      return path.replace(/\/\/+/g, "/");
-    }
-  } else {
-    throw new Error("FOLDER PATH IS NOT DEFINED!");
-  }
-}
+
 const config_file_path = getPath(process.argv[2]);
 const is_file_exists = await fileExists(config_file_path);
 
