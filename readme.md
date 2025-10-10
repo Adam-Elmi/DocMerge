@@ -7,7 +7,7 @@
 1. Organize topics in a folder:
 
 ```
-js/
+js-topics/
  ├── config.js
  ├── 1-variable.mdx
  ├── 2-console.mdx
@@ -24,7 +24,7 @@ node merge.js <topics folder>
 
 ## Output
 
-Generates a single combined file in the target folder.
+Generates a single combined file in the output folder.
 
 > [!NOTE]
 > Orders files by filename (prefix with numbers)
