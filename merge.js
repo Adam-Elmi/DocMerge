@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import fs from "node:fs/promises";
 import os from "node:os";
 /*
@@ -41,13 +42,8 @@ export function getPath(folderPath, file = "config.js") {
     throw new Error("FOLDER PATH IS NOT DEFINED!");
   }
 }
-const config_file_path =
-  import.meta.url === `file://${process.argv[1]}` && process.argv[2]
-    ? getPath(process.argv[2])
-    : "";
-const is_file_exists =
-  import.meta.url === `file://${process.argv[1]}` &&
-  (await fileExists(config_file_path));
+const config_file_path = getPath(process.argv[2]);
+const is_file_exists = await fileExists(config_file_path);
 
 /*
   ---------------
@@ -55,9 +51,7 @@ const is_file_exists =
   ---------------
 */
 
-const config_object =
-  import.meta.url === `file://${process.argv[1]}` &&
-  (await import(config_file_path));
+const config_object = await import(config_file_path);
 /*
   ---------------
   Allowed properties
@@ -78,8 +72,8 @@ const allowed_properties = [
   ---------------
 */
 export function is_includes(obj) {
-  for(const key of Object.keys(obj)) {
-    if(!allowed_properties.includes(key)) {
+  for (const key of Object.keys(obj)) {
+    if (!allowed_properties.includes(key)) {
       return false;
     }
   }
@@ -162,9 +156,7 @@ async function get_properies_info() {
   }
 }
 
-const properties_info =
-  import.meta.url === `file://${process.argv[1]}` &&
-  (await get_properies_info());
+const properties_info = await get_properies_info();
 /*
   ---------------
   Add contents to output file
@@ -174,6 +166,17 @@ const properties_info =
 */
 async function add_contents(path, files) {
   if (path && Array.isArray(files) && files.length > 0) {
+    if (config_object.default.frontmatter) {
+      await fs.appendFile(path, config_object.default.frontmatter + "\n");
+    }
+    if (
+      Array.isArray(config_object.default.imports) &&
+      config_object.default.imports.length > 0
+    ) {
+      config_object.default.imports.forEach(async (value) => {
+        await fs.appendFile(path, "\n" + value + "\n\n");
+      });
+    }
     for (const file of files) {
       const content = await fs.readFile(getPath(process.argv[2], file));
       await fs.appendFile(path, content + "\n");
@@ -229,16 +232,9 @@ async function generate_file() {
           config_object.default.outputDir,
           config_object.default.outputFile,
         );
-        const is_outputFile_exists = await fileExists(path);
-        if (is_outputFile_exists) {
-          await fs.writeFile(path, "");
-          await add_contents(path, files);
-          console.log("FILE IS GENERATED SUCCESSFULLY!");
-        } else {
-          await fs.writeFile(path, "");
-          await add_contents(path, files);
-          console.log("FILE IS GENERATED SUCCESSFULLY!");
-        }
+        await fs.writeFile(path, "");
+        await add_contents(path, files);
+        console.log("FILE IS GENERATED SUCCESSFULLY!");
       } catch (err) {
         console.error(err);
       }
@@ -246,6 +242,4 @@ async function generate_file() {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  await generate_file();
-}
+await generate_file();
