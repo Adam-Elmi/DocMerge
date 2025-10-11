@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import { getPath } from "../../helpers/getPath.js";
+import { getPath } from "../../helpers/index.js";
 export default {
   imports: ["import somcheat from 'somcheat'"],
   frontmatter: `---
